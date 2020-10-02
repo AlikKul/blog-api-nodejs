@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const check = require('check-types');
+const ErrorHandler = require('../helpers/error');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -10,7 +11,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     validate(value) {
       if (!check.string(value)) {
-        throw new Error('Invalid name')
+        throw new ErrorHandler(400, 'Invalid name');
       }
     }
   },
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate(value) {
       if (!check.string(value)) {
-        throw new Error('Invalid email')
+        throw new ErrorHandler(400, 'Invalid email');
       }
     }
   },
@@ -31,7 +32,7 @@ const userSchema = new mongoose.Schema({
     minlength: 3,
     validate(value) {
       if (!check.string(value)) {
-        throw new Error('Invalid password')
+        throw new ErrorHandler(400, 'Invalid password');
       }
     }
   },
@@ -46,11 +47,11 @@ const userSchema = new mongoose.Schema({
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
   if (!user) {
-    throw new Error('Unable to login');
+    throw new ErrorHandler(400, 'Unable to login');
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error('Unable to login');
+    throw new ErrorHandler(400, 'Unable to login');
   }
   return user;
 }

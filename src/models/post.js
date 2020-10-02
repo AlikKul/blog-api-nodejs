@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const check = require('check-types');
+const ErrorHandler = require('../helpers/error');
 
 const postSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    trim: true,
     validate(value) {
-      if (!check.string(value)) {
-        throw new Error('Invalid title')
+      if (!check.nonEmptyString(value)) {
+        throw new ErrorHandler(400, 'Invalid title');
       }
     }
   },
@@ -17,8 +17,8 @@ const postSchema = new mongoose.Schema({
     required: true,
     minlength: 10,
     validate(value) {
-      if (!check.string(value)) {
-        throw new Error('Invalid content')
+      if (!check.nonEmptyString(value)) {
+        throw new ErrorHandler(400, 'Invalid content');
       }
     }
   },

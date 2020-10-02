@@ -3,66 +3,52 @@ const Comment = require('../models/comment');
 const Post = require('../models/post');
 const router = new express.Router();
 const auth = require('../middleware/auth');
+const exceptionsHandler = require('../middleware/errorHandlers');
+const ErrorHandler = require('../helpers/error');
 
-router.get('/comments/:id', async (req,res) => {
-  try {
-    const comments = await Comment.find({ postId: req.params.id });
-    if (comments && comments.length) {
-      res.send(comments);
-    }
-    res.status(404).send();
-  } catch (e) {
-    res.status(500).send();
+router.get('/comments/:id', exceptionsHandler(async (req,res) => {
+  const comments = await Comment.find({ postId: req.params.id });
+  if (comments && comments.length) {
+    return res.send(comments);
   }
-})
+  throw new  ErrorHandler(404, `This post doesn't have any comments`);
+}));
 
-router.post('/comment', auth, async (req, res) => {
-  try {
-    const post = await Post.findOne({ _id: req.body.postId });
-    if (!post) {
-      return res.status(400).send()
-    }
-    const comment = new Comment({
-      ...req.body,
-      creator: req.user._id
-    })
-    await comment.save();
-    res.status(201).send(comment);
-  } catch (e) {
-    res.status(400).send();
+router.post('/comment', auth, exceptionsHandler(async (req, res) => {
+  const post = await Post.findOne({ _id: req.body.postId });
+  if (!post) {
+    throw new ErrorHandler(400, `No post with id ${req.body.postId}`);
   }
-})
+  const comment = new Comment({
+    ...req.body,
+    creator: req.user._id
+  })
+  await comment.save();
+  res.status(201).send(comment);
+}));
 
-router.delete('/comment/:id', auth, async (req, res) => {
-  try {
-    const comment = await Comment.findOneAndDelete({ _id: req.params.id, creator: req.user._id })
-    if (!comment) {
-      return res.status(404).send({ error: 'Comment not found' });
-    }
-    res.send(comment);
-  } catch (e) {
-    res.status(500).send();
+router.delete('/comment/:id', auth, exceptionsHandler(async (req, res) => {
+  const comment = await Comment.findOneAndDelete({ _id: req.params.id, creator: req.user._id })
+  if (!comment) {
+    throw new ErrorHandler(404, 'Comment not found')
   }
-})
+  res.send(comment);
+}));
 
-router.patch('/comment/:id', auth, async (req, res) => {
+router.patch('/comment/:id', auth, exceptionsHandler(async (req, res) => {
   const updates = Object.keys(req.body);
   const validUpdates = ['content'];
   const isUpdateValid = updates.every(update => validUpdates.includes(update));
   if (!isUpdateValid) {
-    return res.status(400).send({ error: 'Invalid update' });
+    throw new ErrorHandler(400, 'Invalid update');
   }
-  try {
-    const comment = await Comment.findOne({ _id: req.params.id, creator: req.user._id });
-    if (!comment) {
-      return res.status(404).send({ error: 'Comment not found' });
-    }
-    updates.forEach(update => comment[update] = req.body[update]);
-    await comment.save();
-    res.send(comment);
-  } catch (e) {
-    res.status(400).send();
+  const comment = await Comment.findOne({ _id: req.params.id, creator: req.user._id });
+  if (!comment) {
+    throw new ErrorHandler(404, 'Comment not found');
   }
-})
+  updates.forEach(update => comment[update] = req.body[update]);
+  await comment.save();
+  res.send(comment);
+}));
 
 module.exports = router;

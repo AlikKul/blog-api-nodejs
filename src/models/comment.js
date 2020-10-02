@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const check = require('check-types');
+const ErrorHandler = require('../helpers/error');
 
 const commentSchema = new mongoose.Schema({
   creator: {
@@ -13,7 +14,7 @@ const commentSchema = new mongoose.Schema({
     minlength: 3,
     validate(value) {
       if (!check.string(value)) {
-        throw new Error('Invalid content')
+        throw new ErrorHandler(400, 'Invalid content');
       }
     }
   },

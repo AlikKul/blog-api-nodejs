@@ -2,36 +2,28 @@ const express = require('express');
 const User = require('../models/user');
 const router = new express.Router();
 const auth = require('../middleware/auth');
+const exceptionsHandler = require('../middleware/errorHandlers');
+const ErrorHandler = require('../helpers/error');
 
-router.post('/user/login', async (req, res) => {
-  try {
-    const user = await User.findByCredentials(req.body.email, req.body.password);
-    const token = await user.generateAuthToken();
-    
-    res.send({ user, token });
-  } catch (e) {
-    res.status(400).send();
+router.post('/user/login', exceptionsHandler(async (req, res) => {
+  const user = await User.findByCredentials(req.body.email, req.body.password);
+  if (!user) {
+    throw new ErrorHandler(400, 'Invalid user password or email')
   }
-});
+  const token = await user.generateAuthToken();
+  res.send({ user, token });
+}));
 
-router.post('/user/logout', auth, async (req, res) => {
-  try {
-    req.user.tokens = req.user.tokens.filter(token => token.token !== req.token);
-    await req.user.save();
-    res.send();
-  } catch (e) {
-    res.status(500).send();
-  }
-})
+router.post('/user/logout', auth, exceptionsHandler(async (req, res) => {
+  req.user.tokens = req.user.tokens.filter(token => token.token !== req.token);
+  await req.user.save();
+  res.send();
+}));
 
-router.post('/user', async (req, res) => {
+router.post('/user', exceptionsHandler(async (req, res) => {
   const user = new User(req.body);
-  try {
-    await user.save();
-    res.status(201).send(user);
-  } catch (e) {
-    res.status(400).send(e);
-  }
-});
+  await user.save();
+  res.status(201).send(user);
+}));
 
 module.exports = router;
