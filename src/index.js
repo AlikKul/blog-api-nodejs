@@ -22,9 +22,6 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(port, (err, res) => {
-  if (err) {
-    return console.log('Server was unable to start');
-  }
   console.log(`Server is up and running. Listening at port ${port}`);
 })
 

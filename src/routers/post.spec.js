@@ -73,7 +73,6 @@ describe('PATCH /post/:realId', () => {
     .set('Authorization', `Bearer ${process.env.TOKEN}`)
     .send({ title: 'edited', content: 'edited' })
     .expect(res => {
-      console.log(res.body)
       if (res.body.title !== 'edited' || res.body.content !== 'edited') throw new Error('Invalid response');
     })
     .expect(200, done);
