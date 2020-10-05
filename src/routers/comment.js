@@ -14,14 +14,15 @@ router.get('/comments/:id', exceptionsHandler(async (req,res) => {
   throw new  ErrorHandler(404, `This post doesn't have any comments`);
 }));
 
-router.post('/comment', auth, exceptionsHandler(async (req, res) => {
-  const post = await Post.findOne({ _id: req.body.postId });
+router.post('/comment/:postId', auth, exceptionsHandler(async (req, res) => {
+  const post = await Post.findOne({ _id: req.params.postId });
   if (!post) {
-    throw new ErrorHandler(400, `No post with id ${req.body.postId}`);
+    throw new ErrorHandler(400, `No post with id ${req.params.postId}`);
   }
   const comment = new Comment({
     ...req.body,
-    creator: req.user._id
+    creator: req.user._id,
+    postId: req.params.postId
   })
   await comment.save();
   res.status(201).send(comment);

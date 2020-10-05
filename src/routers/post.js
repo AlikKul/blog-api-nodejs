@@ -30,7 +30,7 @@ router.get('/post/:id', exceptionsHandler(async (req, res) => {
   res.send(post);
 }));
 
-router.patch('/post/:id', auth, exceptionsHandler(auth, async (req, res) => {
+router.patch('/post/:id', auth, exceptionsHandler(async (req, res) => {
   const updates = Object.keys(req.body);
   const validUpdates = ['title', 'content'];
   const isUpdateValid = updates.every(update => validUpdates.includes(update));
