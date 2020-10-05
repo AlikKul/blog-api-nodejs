@@ -15,7 +15,6 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    minlength: 10,
     validate(value) {
       if (!check.nonEmptyString(value)) {
         throw new ErrorHandler(400, 'Invalid content');

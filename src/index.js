@@ -1,5 +1,4 @@
 const express = require('express');
-const { handleError } = require('./helpers/error');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
 const postRouter = require('./routers/post');
