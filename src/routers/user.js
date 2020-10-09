@@ -26,4 +26,9 @@ router.post('/user', exceptionsHandler(async (req, res) => {
   res.status(201).send(user);
 }));
 
+router.get('/users', exceptionsHandler(async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+}));
+
 module.exports = router;
